@@ -2,146 +2,99 @@
 Bu araç, bozuk veya kısmen hasar görmüş JPEG ve PNG dosyalarını onarmak için geliştirilmiş, profesyonel seviyede algoritmalar kullanan bir masaüstü uygulamasıdır. Tek bir akıcı arayüzde birden fazla onarım tekniğini ve gelişmiş bir çıktı skorlama sistemini birleştirir.
 
 ## ✨ Temel Özellikler
-JPEG Onarımı
-1. Marker Onarımı: Yanlış yerleştirilmiş SOI (Start of Image) ve EOI (End of Image) işaretleyicilerini düzeltir.
+### JPEG Onarımı
+- Marker Onarımı: Yanlış yerleştirilmiş SOI (Start of Image) ve EOI (End of Image) işaretleyicilerini düzeltir.
+- Smart Header V3: Bozuk JPEG dosyalarında DQT / DHT tablolarını referans bir header veya dinamik bir Header Kütüphanesi kullanarak yeniden inşa eder.
+- Partial Top Recovery: Dosyanın üst kısmındaki veri kayıplarını farklı oranlarda deneyerek kurtarmaya çalışır.
+- EXIF Thumbnail'den Kurtarma: Dosya içinde mevcut olan küçük EXIF önizleme resmini çıkarır ve isteğe bağlı olarak büyütür (Upscale).
+- Gömülü JPEG Taraması: Dosya içindeki gizli veya gömülü JPEG verilerini tarayarak çıkarır.
 
-2. Smart Header V3: Bozuk JPEG dosyalarında DQT / DHT tablolarını (görüntü kalitesini ve renk haritasını belirleyen kritik yapılar) referans bir header veya dinamik bir Header Kütüphanesi kullanarak yeniden inşa eder.
+### PNG Onarımı
+- PNG CRC Düzeltme: CRC (Cyclic Redundancy Check) hatalarını normal veya agresif (AGGR) modda düzelterek veri bütünlüğünü sağlar.
+- Ancillary Chunk Atlama: Hatalı ek (ancillary) veri bloklarının isteğe bağlı olarak atlanmasıyla onarım sağlar.
 
-3. Partial Top Recovery: Dosyanın üst kısmındaki veri kayıplarını farklı oranlarda deneyerek kurtarmaya çalışır.
-
-4. EXIF Thumbnail'den Kurtarma: Dosya içinde mevcut olan küçük EXIF önizleme resmini çıkarır ve isteğe bağlı olarak büyütür (Upscale).
-
-5. Gömülü JPEG Taraması: Dosya içindeki gizli veya gömülü JPEG verilerini tarayarak çıkarır.
-
-PNG Onarımı
-1. PNG CRC Düzeltme: CRC (Cyclic Redundancy Check) hatalarını hem normal hem de agresif (AGGR) modda düzelterek veri bütünlüğünü sağlar.
-
-2. Ancillary Chunk Atlama: Hatalı ek (ancillary) veri bloklarının isteğe bağlı olarak atlanmasıyla onarımı mümkün kılar.
-
-Genel Yöntemler ve Dönüştürme
-1. Pillow ile Yeniden Kaydetme: Basit format hatalarını düzeltmek için popüler Python kütüphanesi Pillow kullanılarak dosyayı yeniden yazar.
-
-2. PNG Roundtrip: Dosyayı geçici olarak PNG formatına çevirip tekrar orijinal formata döndürerek bozulmaları temizler.
-
-3. FFmpeg ile Yeniden Encode: Kuruluysa, güçlü FFmpeg aracını kullanarak dosyayı yeniden kodlar (JPEG/PNG için farklı kalite ön ayarları mevcuttur).
+### Genel Yöntemler ve Dönüştürme
+- Pillow ile Yeniden Kaydetme: Basit format hatalarını düzeltmek için dosyayı yeniden yazar.
+- PNG Roundtrip: Dosyayı geçici olarak PNG formatına çevirip tekrar orijinal formata döndürerek bozulmaları temizler.
+- FFmpeg ile Yeniden Encode: FFmpeg kuruluysa dosyayı yeniden kodlar (JPEG/PNG için farklı kalite ön ayarları mevcuttur).
 
 ## 💡 Akıllı Skorlama Sistemi
-Programın en güçlü özelliği, onarılan her bir çıktıyı analiz eden ve puanlayan Akıllı Skorlama mekanizmasıdır. Bu skorlar sayesinde en iyi onarım sonucu kullanıcıya sunulur.
-
-Detay / Entropi Analizi
-
-Keskinlik Tahmini
-
-Gri Oranı (Tek tonlu veya bozulmuş görüntü tespiti)
-
-Kırpılmış Veri İhtimali (Truncation)
-
-Çözünürlük ve Dosya Boyutu Dengesi
+Onarılan her bir çıktı, Akıllı Skorlama mekanizmasıyla analiz edilir ve puanlanır. Böylece kullanıcıya en iyi onarım sonucu sunulur:
+- Detay / Entropi Analizi
+- Keskinlik Tahmini
+- Gri Oranı (tek tonlu veya bozulmuş görüntü tespiti)
+- Kırpılmış Veri İhtimali (truncation)
+- Çözünürlük ve dosya boyutu dengesi
 
 ## ⚙️ Arayüz ve Kullanılabilirlik
 Uygulama, tüm ayarları tek bir akıcı pencerede sunar:
-
-Toplu İşlem: Tek bir dosyayı veya komple bir klasörü ve içindeki tüm resimleri onarma.
-
-Hızlı Önizleme: Orijinal dosya ile Akıllı Skorlama ile seçilen En İyi Onarım çıktısını yan yana gösterir.
-
-Log Yönetimi: Tüm işlem kayıtları ve hatalar anlık olarak log penceresinde gösterilir ve TXT / CSV formatında dışa aktarılabilir.
-
-Çıktı Klasörü: Onarılan dosyaların otomatik olarak girdi klasöründe oluşturulan repaired_images alt klasörüne veya özel bir klasöre kaydedilme seçeneği.
+- Toplu işlem: Tek bir dosyayı veya komple bir klasörü onarma
+- Hızlı önizleme: Orijinal ve en iyi onarım çıktısını yan yana gösterme
+- Log yönetimi: İşlem kayıtlarını anlık olarak görüntüleme ve TXT/CSV'ye aktarma
+- Çıktı klasörü: Onarılan dosyaları otomatik `repaired_images` alt klasörüne veya özel bir klasöre kaydetme
 
 ## ⬇️ Kurulum ve Çalıştırma
-Bu uygulamayı çalıştırmak için daha önce Python kurmuş olmanız gerekmez. Aşağıdaki adımları uygulayarak programı hemen kullanmaya başlayabilirsiniz.
+Bu uygulamayı çalıştırmak için daha önce Python kurmuş olmanız gerekmez. Aşağıdaki adımları izleyerek programı hemen kullanmaya başlayabilirsiniz.
+### 1. 📦 Program Klasörünü Hazırlama
+- İndirdiğiniz ZIP dosyasını açın.
+- Klasörü sabit bir yere (ör. Masaüstü veya `C:\Resim Onarım Aracı`) çıkarın.
+- Klasörde `Gereksinimler.txt` ve `Kurulumu_Baslat.bat` dosyalarının bulunduğundan emin olun.
 
-## 1. 📦 Program Klasörünü Hazırlama
-İndirdiğiniz ZIP dosyasını bilgisayarınızda açın.
+### 2. 🛠 Tek Tıkla Kurulumu Başlatma
+- Klasör içindeki `Kurulumu_Baslat.bat` dosyasına sağ tıklayın ve **Yönetici olarak çalıştırın**.
+- Komut dosyası Python'u indirir, sistem PATH'ine ekler ve `Gereksinimler.txt` içindeki Python kütüphanelerini otomatik yükler.
+- Kurulum bittiğinde komut penceresi kapanır.
 
-Klasörü sabit bir yere (örneğin Masaüstüne veya C:\Resim Onarım Aracı altına) çıkarın.
-
-Klasörün içinde şu dosyaların olduğundan emin olun (özellikle Gereksinimler.txt ve Kurulumu_Baslat.bat):
-
-## 2. 🛠 Tek Tıkla Kurulumu Başlatma
-Klasör içindeki Kurulumu_Baslat.bat dosyasına sağ tıklayın ve Yönetici olarak çalıştırın.
-
-(Yönetici izni gereklidir, çünkü Python ve paketleri sisteme yükleyecektir.)
-
-Kurulum betiği şunları yapacaktır:
-
-Python'u İndirip Kurar: Python'u indirir ve sistem PATH'ine ekler.
-
-Gerekli Paketleri Yükler: Programın çalışması için gereken tüm Python kütüphanelerini (Gereksinimler.txt içindeki) otomatik olarak yükler.
-
-Kurulum bittiğinde, komut penceresi kapanacaktır.
-
-## 3. ▶️ Programı Çalıştırma
-Program klasörüne geri dönün.
-
-Başlat.cmd dosyasına çift tıklayın.
-
-Resim Onarım Aracı penceresi açılacaktır.
+### 3. ▶️ Programı Çalıştırma
+- Program klasörüne dönün ve `Baslat.cmd` dosyasına çift tıklayın.
+- Resim Onarım Aracı penceresi açılacaktır.
 
 ## 🛠 FFmpeg Kurulumu (İsteğe Bağlı ama Önerilir)
-Program açıldığında ffmpeg bulunamadı uyarısı göreceksiniz
-
-FFmpeg, yeniden encode yöntemlerini kullanmak için önemlidir. Kurulumu çok basittir:
-
-ffmpeg.org gibi güvenilir bir kaynaktan FFmpeg'in Windows sürümünü indirin.
-
-İndirdiğiniz paketin içinden ffmpeg.exe dosyasını bulun.
-
-Bu ffmpeg.exe dosyasını, tıpkı Başlat.cmd gibi, programın ana klasörüne kopyalayın:
-
-Programı tekrar çalıştırdığınızda, arayüzde "FFmpeg bulundu" şeklinde yeşil bir bilgi göreceksiniz.
+- Program açıldığında ffmpeg bulunamadı uyarısı görebilirsiniz; yeniden encode yöntemleri için FFmpeg gereklidir.
+- ffmpeg.org gibi güvenilir bir kaynaktan FFmpeg'in Windows sürümünü indirin ve `ffmpeg.exe` dosyasını çıkarın.
+- `ffmpeg.exe` dosyasını programın ana klasörüne (ör. `Baslat.cmd` ile aynı konum) kopyalayın.
+- Programı tekrar çalıştırdığınızda arayüzde "FFmpeg bulundu" bilgisini görebilirsiniz.
 
 ## 🧑‍💻 Geliştirici Rehberi
-Uygulamayı geliştirmek veya katkıda bulunmak için aşağıdaki adımları izleyin. Depo içinde güncel dokümantasyon dosyaları olan `README.md`, `CONTRIBUTING.md` ve pip uyumlu `gereksinimler.txt` yer almaktadır; geliştirme sürecinde bu dosyaların güncel kalmasına dikkat edin.
+Uygulamayı geliştirmek veya katkıda bulunmak için aşağıdaki adımları izleyin. Depoda güncel dokümantasyon dosyaları (`README.md`, `CONTRIBUTING.md`, pip uyumlu `gereksinimler.txt`) bulunduğundan geliştirme sırasında güncel kalmalarına dikkat edin.
 
 ### 1) Sanal ortam oluşturma
-Python ve pip sistemde hazırsa proje kökünde bir sanal ortam oluşturun:
-
 - **macOS / Linux:**
   ```bash
   python3 -m venv .venv
   source .venv/bin/activate
   ```
-
 - **Windows (PowerShell):**
   ```powershell
   py -m venv .venv
   .\.venv\Scripts\Activate.ps1
   ```
-
-Aktif hâle gelen ortamda `python` ve `pip` komutları doğrudan kullanılabilir.
+- Ortam aktifken `python` ve `pip` komutlarını doğrudan kullanabilirsiniz.
 
 ### 2) Bağımlılıkları yükleme (pip)
-Proje gereksinimleri `gereksinimler.txt` dosyasında, pip ile uyumlu biçimde listelenir:
-
-```bash
-python -m pip install --upgrade pip
-python -m pip install -r gereksinimler.txt
-```
-
-Dosya adı Türkçe olsa da doğrudan `-r gereksinimler.txt` parametresiyle kullanılabilir; ekstra bir dönüştürme yapmanız gerekmez. Windows kullanıcıları `py -m pip ...` komutunu da tercih edebilir.
-
-- **Windows:** PowerShell veya CMD'de proje klasörüne gelip `py -m pip install -r gereksinimler.txt` komutunu çalıştırın.
-- **macOS / Linux:** Terminalde proje klasörüne gelip `python3 -m pip install -r gereksinimler.txt` komutunu çalıştırın.
+- Pip'i güncelleyin ve gereksinimleri kurun:
+  ```bash
+  python -m pip install --upgrade pip
+  python -m pip install -r gereksinimler.txt
+  ```
+- Dosya adı Türkçe olsa da `-r gereksinimler.txt` parametresiyle doğrudan kullanılabilir; Windows kullanıcıları `py -m pip ...` komutunu tercih edebilir.
+- **Windows:** PowerShell/CMD'de proje klasöründe `py -m pip install -r gereksinimler.txt`
+- **macOS / Linux:** Terminalde proje klasöründe `python3 -m pip install -r gereksinimler.txt`
 
 ### 3) Conda ile çalışma
-Conda kullanıyorsanız önce pip içeren bir ortam açın, ardından aynı `gereksinimler.txt` dosyasını kullanın:
-
-```bash
-conda create -n resim-onarim python=3.10 pip
-conda activate resim-onarim
-pip install -r gereksinimler.txt
-```
+- Pip içeren bir ortam açın ve aynı `gereksinimler.txt` dosyasını kullanın:
+  ```bash
+  conda create -n resim-onarim python=3.10 pip
+  conda activate resim-onarim
+  pip install -r gereksinimler.txt
+  ```
 
 ### 4) Uygulamayı çalıştırma ve test etme
 - Arayüzü başlatmak için: `python main.py`
-- GUI'yi modül olarak çalıştırmak isterseniz: `python -m gui`
+- GUI'yi modül olarak çalıştırmak için: `python -m gui`
 - Varsa otomatik testleri çalıştırmak için: `python -m unittest discover`
-
-Test komutu, `tests/` dizinine ekleyeceğiniz birim testlerini otomatik olarak yakalayacak şekilde ayarlanmıştır. Şu an için kapsamlı bir test dizisi bulunmuyorsa komut hızlıca tamamlanır.
+- Test komutu, `tests/` dizinindeki birim testlerini otomatik yakalayacak şekilde ayarlanmıştır; kapsamlı test yoksa komut hızlı tamamlanır.
 
 ## 🤝 Katkıda Bulunma
-Geri bildirimleriniz, hata raporlarınız ve yeni özellik önerileriniz değerlidir! Lütfen bir Issue açarak veya bir Pull Request göndererek katkıda bulunun.
-
-Daha detaylı süreç bilgisi için lütfen [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına göz atın.
+- Geri bildirim, hata raporu veya yeni özellik önerilerinizi Issue açarak veya Pull Request göndererek paylaşabilirsiniz.
+- Sürece dair detaylar için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bakın.
