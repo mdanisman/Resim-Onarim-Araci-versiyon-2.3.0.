@@ -1,7 +1,7 @@
 ## 📸 Gelişmiş Resim Onarım Aracı
 Bu araç, bozuk veya kısmen hasar görmüş JPEG ve PNG dosyalarını onarmak için geliştirilmiş, profesyonel seviyede algoritmalar kullanan bir masaüstü uygulamasıdır. Tek bir akıcı arayüzde birden fazla onarım tekniğini ve gelişmiş bir çıktı skorlama sistemini birleştirir.
 
-✨ ## Temel Özellikler
+## ✨ Temel Özellikler
 JPEG Onarımı
 Marker Onarımı: Yanlış yerleştirilmiş SOI (Start of Image) ve EOI (End of Image) işaretleyicilerini düzeltir.
 
@@ -25,7 +25,7 @@ PNG Roundtrip: Dosyayı geçici olarak PNG formatına çevirip tekrar orijinal f
 
 FFmpeg ile Yeniden Encode: Kurulumluysa, güçlü FFmpeg aracını kullanarak dosyayı yeniden kodlar (JPEG/PNG için farklı kalite ön ayarları mevcuttur).
 
-💡 ## Akıllı Skorlama Sistemi
+## 💡 Akıllı Skorlama Sistemi
 Programın en güçlü özelliği, onarılan her bir çıktıyı analiz eden ve puanlayan Akıllı Skorlama mekanizmasıdır. Bu skorlar sayesinde en iyi onarım sonucu kullanıcıya sunulur.
 
 Detay / Entropi Analizi
@@ -49,9 +49,58 @@ Log Yönetimi: Tüm işlem kayıtları ve hatalar anlık olarak log penceresinde
 
 Çıktı Klasörü: Onarılan dosyaların otomatik olarak girdi klasöründe oluşturulan repaired_images alt klasörüne veya özel bir klasöre kaydedilme seçeneği.
 
-⬇️ ## Kurulum ve Çalıştırma
+## ⬇️ Kurulum ve Çalıştırma
+Bu uygulamayı çalıştırmak için daha önce Python kurmuş olmanız gerekmez. Aşağıdaki adımları uygulayarak programı hemen kullanmaya başlayabilirsiniz.
+
+## 1. 📦 Program Klasörünü Hazırlama
+Geliştiriciden aldığınız veya GitHub'dan indirdiğiniz ZIP dosyasını açın.
+
+Klasörü sabit bir yere (örneğin Masaüstüne veya C:\ImageRepairEngine altına) çıkarın.
+
+Klasörün içinde şu dosyaların olduğundan emin olun (özellikle requirements.txt ve Kurulumu_Baslat.bat):
+
+C:\ImageRepairEngine\
+│
+├── Kurulumu_Baslat.bat  ← Sizin için her şeyi bu dosya halledecek!
+├── Başlat.cmd           ← Kurulum sonrası çalıştırma dosyası
+├── requirements.txt
+└── (gui.py, repair_engine.py vb. diğer tüm Python dosyaları)
+## 2. 🛠 Tek Tıkla Kurulumu Başlatma
+Klasör içindeki Kurulumu_Baslat.bat dosyasına sağ tıklayın ve Yönetici olarak çalıştırın.
+
+(Yönetici izni gereklidir, çünkü Python ve paketleri sisteme yükleyecektir.)
+
+Kurulum betiği şunları yapacaktır:
+
+Python'u İndirip Kurar: Python'u indirir ve sistem PATH'ine ekler.
+
+Gerekli Paketleri Yükler: Programın çalışması için gereken tüm Python kütüphanelerini (requirements.txt içindeki) otomatik olarak yükler.
+
+Kurulum bittiğinde, komut penceresi kapanacaktır.
+
+## 3. ▶️ Programı Çalıştırma
+Program klasörüne geri dönün.
+
+Başlat.cmd dosyasına çift tıklayın.
+
+Resim Onarım Aracı penceresi açılacaktır.
+
+## 🛠 FFmpeg Kurulumu (İsteğe Bağlı ama Önerilir)
+FFmpeg, yeniden encode yöntemlerini kullanmak için önemlidir. Kurulumu çok basittir:
+
+ffmpeg.org gibi güvenilir bir kaynaktan FFmpeg'in Windows sürümünü indirin.
+
+İndirdiğiniz paketin içinden ffmpeg.exe dosyasını bulun.
+
+Bu ffmpeg.exe dosyasını, tıpkı Başlat.cmd gibi, programın ana klasörüne kopyalayın:
+
+C:\ImageRepairEngine\
+│
+├── Başlat.cmd
+├── ffmpeg.exe  ← Buraya kopyalayın
+└── ...
+Programı tekrar çalıştırdığınızda, arayüzde "FFmpeg bulundu" şeklinde yeşil bir bilgi göreceksiniz.
 
 
-
-🤝 Katkıda Bulunma
+## 🤝 Katkıda Bulunma
 Geri bildirimleriniz, hata raporlarınız ve yeni özellik önerileriniz değerlidir! Lütfen bir Issue açarak veya bir Pull Request göndererek katkıda bulunun.
