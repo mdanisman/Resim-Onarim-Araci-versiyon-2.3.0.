@@ -92,6 +92,56 @@ Bu ffmpeg.exe dosyasını, tıpkı Başlat.cmd gibi, programın ana klasörüne 
 
 Programı tekrar çalıştırdığınızda, arayüzde "FFmpeg bulundu" şeklinde yeşil bir bilgi göreceksiniz.
 
+## 🧑‍💻 Geliştirici Rehberi
+Uygulamayı geliştirmek veya katkıda bulunmak için aşağıdaki adımları izleyin. Depo içinde güncel dokümantasyon dosyaları olan `README.md`, `CONTRIBUTING.md` ve pip uyumlu `gereksinimler.txt` yer almaktadır; geliştirme sürecinde bu dosyaların güncel kalmasına dikkat edin.
+
+### 1) Sanal ortam oluşturma
+Python ve pip sistemde hazırsa proje kökünde bir sanal ortam oluşturun:
+
+- **macOS / Linux:**
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```
+
+- **Windows (PowerShell):**
+  ```powershell
+  py -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  ```
+
+Aktif hâle gelen ortamda `python` ve `pip` komutları doğrudan kullanılabilir.
+
+### 2) Bağımlılıkları yükleme (pip)
+Proje gereksinimleri `gereksinimler.txt` dosyasında, pip ile uyumlu biçimde listelenir:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r gereksinimler.txt
+```
+
+Dosya adı Türkçe olsa da doğrudan `-r gereksinimler.txt` parametresiyle kullanılabilir; ekstra bir dönüştürme yapmanız gerekmez. Windows kullanıcıları `py -m pip ...` komutunu da tercih edebilir.
+
+- **Windows:** PowerShell veya CMD'de proje klasörüne gelip `py -m pip install -r gereksinimler.txt` komutunu çalıştırın.
+- **macOS / Linux:** Terminalde proje klasörüne gelip `python3 -m pip install -r gereksinimler.txt` komutunu çalıştırın.
+
+### 3) Conda ile çalışma
+Conda kullanıyorsanız önce pip içeren bir ortam açın, ardından aynı `gereksinimler.txt` dosyasını kullanın:
+
+```bash
+conda create -n resim-onarim python=3.10 pip
+conda activate resim-onarim
+pip install -r gereksinimler.txt
+```
+
+### 4) Uygulamayı çalıştırma ve test etme
+- Arayüzü başlatmak için: `python main.py`
+- GUI'yi modül olarak çalıştırmak isterseniz: `python -m gui`
+- Varsa otomatik testleri çalıştırmak için: `python -m unittest discover`
+
+Test komutu, `tests/` dizinine ekleyeceğiniz birim testlerini otomatik olarak yakalayacak şekilde ayarlanmıştır. Şu an için kapsamlı bir test dizisi bulunmuyorsa komut hızlıca tamamlanır.
 
 ## 🤝 Katkıda Bulunma
 Geri bildirimleriniz, hata raporlarınız ve yeni özellik önerileriniz değerlidir! Lütfen bir Issue açarak veya bir Pull Request göndererek katkıda bulunun.
+
+Daha detaylı süreç bilgisi için lütfen [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına göz atın.
