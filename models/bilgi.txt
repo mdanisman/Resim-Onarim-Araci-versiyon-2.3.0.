@@ -1,0 +1,1 @@
+AI desteği ekleme işlemleri bitince model dosyaları bu klasöre indirilecek.
