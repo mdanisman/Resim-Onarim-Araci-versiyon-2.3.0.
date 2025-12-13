@@ -16,25 +16,31 @@ set ESRNET_DRIVE=https://drive.google.com/uc?export^=download^&id=15njh9lkvdBgBu
 
 mode con: cols=78 lines=32
 color 1F
-title Resim Onarim Araci - Kurulum Sihirbazi ^| Muharrem DANISMAN
+TITLE Resim Onarim Araci - Kurulum Sihirbazi
 
 cls
 echo.
-echo  ===========================================================================
-echo             RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| Muharrem DANISMAN
-echo  ===========================================================================
+echo  ==================================================================
+echo   		RESIM ONARIM ARACI - KURULUM SIHIRBAZI
+echo  ==================================================================
 echo.
-echo   Bu sihirbaz asagidaki islemleri otomatik yapar:
+echo   Gelistirici :  Muharrem DANISMAN
+echo   Iletisim    :  mdanisman3@gmail.com
+echo   Telif Hakki :  ^(C^) 2025  Muharrem DANISMAN - Tum haklari saklidir.
 echo.
-echo     * Python 3.10 kontrolu / kurulumu
-echo     * Gerekli Python kutuphaneleri
-echo     * AI model dosyalari (GFPGAN / RealESRGAN)
+echo  Bu sihirbaz, Resim Onarim Araci'nin calisabilmesi icin gereken:
 echo.
-echo   Not: Python sistemde varsa tekrar kurulmaz.
+echo    - Python 3.10 (Kurulu degilse)
+echo    - Gerekli Python kutuphaneleri (Pillow, vb.)
+echo    - AI kutuphanelerinin indirilmesi
+echo    - Baslat.cmd dosyasinin olusturulmasi
 echo.
-echo  ===========================================================================
+echo  gibi temel kurulum adimlarini gerceklestirecek.
 echo.
-pause
+echo  Devam etmek icin bir tusa basin...
+echo  (Kurulumu iptal etmek icin pencereyi kapatabilirsiniz.)
+echo  ------------------------------------------------------------------
+pause >nul
 
 :: ============================================================================
 :: ADIM 1 - PYTHON 3.10 KONTROLU
@@ -42,8 +48,15 @@ pause
 cls
 echo.
 echo  ===========================================================================
-echo   RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 1 / 4  -  PYTHON KONTROLU
+echo   		KURULUM SIHIRBAZI ^| ADIM 1 / 4  -  PYTHON KONTROLU
 echo  ===========================================================================
+echo.
+echo   Gelistirici :  Muharrem DANISMAN
+echo   Iletisim    :  mdanisman3@gmail.com
+echo   Telif Hakki :  ^(C^) 2025  Muharrem DANISMAN - Tum haklari saklidir.
+echo.
+echo  Sisteminizde Python komutunun varligi kontrol ediliyor...
+echo.
 
 set PY310_EXE=
 
@@ -96,8 +109,16 @@ pause
 cls
 echo.
 echo  ===========================================================================
-echo  RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 2 / 4  -  BAGIMLILIKLAR
+echo  		KURULUM SIHIRBAZI ^| ADIM 2 / 4  -  BAGIMLILIKLAR
 echo  ===========================================================================
+echo.
+echo   Gelistirici :  Muharrem DANISMAN
+echo   Iletisim    :  mdanisman3@gmail.com
+echo   Telif Hakki :  ^(C^) 2025  Muharrem DANISMAN - Tum haklari saklidir.
+echo.
+echo  Bu adimda, programin calismasi icin gereken Python paketleri
+echo  (Pillow ve digerleri) yuklenecektir.
+echo.
 
 echo  pip guncelleniyor...
 "%PY310_EXE%" -m pip install --upgrade pip
@@ -135,8 +156,16 @@ goto STEP3
 cls
 echo.
 echo  ===========================================================================
-echo  RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 3 / 4  -  MODEL KONTROLU
+echo  		KURULUM SIHIRBAZI ^| ADIM 3 / 4  -  MODEL KONTROLU
 echo  ===========================================================================
+echo.
+echo   Gelistirici :  Muharrem DANISMAN
+echo   Iletisim    :  mdanisman3@gmail.com
+echo   Telif Hakki :  ^(C^) 2025  Muharrem DANISMAN - Tum haklari saklidir.
+echo.
+echo  Bu adimda, AI model kutuphaneleri indirilecektir.
+echo  (GFPGANv1.3.pth ve digerleri)
+echo.
 
 if not exist "%MODEL_DIR%" mkdir "%MODEL_DIR%"
 
