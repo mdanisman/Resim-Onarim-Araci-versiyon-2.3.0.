@@ -21,8 +21,7 @@ title Resim Onarim Araci - Kurulum Sihirbazi ^| Muharrem DANISMAN
 cls
 echo.
 echo  ===========================================================================
-echo                       RESIM ONARIM ARACI
-echo                         KURULUM SIHIRBAZI
+echo             RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| Muharrem DANISMAN
 echo  ===========================================================================
 echo.
 echo   Bu sihirbaz asagidaki islemleri otomatik yapar:
@@ -43,7 +42,7 @@ pause
 cls
 echo.
 echo  ===========================================================================
-echo                     ADIM 1 / 4  -  PYTHON KONTROLU
+echo   RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 1 / 4  -  PYTHON KONTROLU
 echo  ===========================================================================
 
 set PY310_EXE=
@@ -97,7 +96,7 @@ pause
 cls
 echo.
 echo  ===========================================================================
-echo                  ADIM 2 / 4  -  BAGIMLILIKLAR
+echo  RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 2 / 4  -  BAGIMLILIKLAR
 echo  ===========================================================================
 
 echo  pip guncelleniyor...
@@ -136,7 +135,7 @@ goto STEP3
 cls
 echo.
 echo  ===========================================================================
-echo                  ADIM 3 / 4  -  MODEL KONTROLU
+echo  RESIM ONARIM ARACI KURULUM SIHIRBAZI ^| ADIM 3 / 4  -  MODEL KONTROLU
 echo  ===========================================================================
 
 if not exist "%MODEL_DIR%" mkdir "%MODEL_DIR%"
