@@ -489,7 +489,7 @@ class RepairController:
             f"Onarım işlemi tamamlandı.\nToplam: {total}\nOnarılan: {fixed}\nBaşarısız: {failed}",
         )
 
-   def _on_processing_error(self, exc: Exception) -> None:
+    def _on_processing_error(self, exc: Exception) -> None:
         messagebox.showerror(
             "Hata",
             f"İşleme sırasında beklenmeyen hata oluştu:\n{exc}",
@@ -498,7 +498,7 @@ class RepairController:
             f"Beklenmeyen hata: {exc}",
             color="red",
             extra={"step": "process-error", "result": "failed"},
-        )␊
+        )
         self._on_processing_finished()
 
     # --------------------------------------

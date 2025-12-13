@@ -127,7 +127,7 @@ class RepairService:
 
                     # 2) AI JPEG Patch Reconstruction (sadece JPEG’lerde)
                     try:
-                         if (
+                        if (
                             options.use_ai_patch
                             and outputs
                             and f.suffix.lower() in (".jpg", ".jpeg")
