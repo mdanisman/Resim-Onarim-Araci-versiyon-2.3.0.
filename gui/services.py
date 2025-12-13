@@ -4,6 +4,7 @@ import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
+import time
 
 from core.repair_engine import repair_image_all_methods
 from core.ai_patch import apply_ai_reconstruction_to_outputs  # YENİ
@@ -32,7 +33,7 @@ class ProcessingOptions:
     keep_apps: bool
     keep_com: bool
     resolve_output_dir: Callable[[Path], Optional[Path]]
-    log: Callable[[str, str], None]
+    log: Callable[[str, str, Optional[dict]], None]
 
     # YENİ: AI JPEG Patch Reconstruction seçenekleri
     use_ai_patch: bool = False
@@ -67,7 +68,11 @@ class RepairService:
             try:
                 for f in files:
                     if self.cancel_requested:
-                        options.log("İşlem kullanıcı tarafından iptal edildi.", color="red")
+                        options.log(
+                            "İşlem kullanıcı tarafından iptal edildi.",
+                            color="red",
+                            extra={"step": "cancel", "result": "requested"},
+                        )
                         break
 
                     out_dir = options.resolve_output_dir(f)
@@ -75,6 +80,7 @@ class RepairService:
                         options.log(
                             f"Çıktı klasörü oluşturulamadığı için atlandı: {f}",
                             color="red",
+                            extra={"step": "output", "file": str(f), "result": "skipped"},
                         )
                         continue
 
@@ -86,7 +92,12 @@ class RepairService:
                     else:
                         q_list = [4, 5]
 
-                    options.log(f"İşleniyor: {f}", color="black")
+                    options.log(
+                        f"İşleniyor: {f}",
+                        color="black",
+                        extra={"step": "file-start", "file": str(f), "result": "processing"},
+                    )
+                    started_at = time.perf_counter()
 
                     # 1) Klasik yöntemlerle onarım
                     outputs = repair_image_all_methods(
@@ -116,11 +127,12 @@ class RepairService:
 
                     # 2) AI JPEG Patch Reconstruction (sadece JPEG’lerde)
                     try:
-                        if (
+                         if (
                             options.use_ai_patch
                             and outputs
                             and f.suffix.lower() in (".jpg", ".jpeg")
                         ):
+                            ai_start = time.perf_counter()
                             ai_outputs = apply_ai_reconstruction_to_outputs(
                                 input_path=f,
                                 outputs=outputs,
@@ -131,14 +143,50 @@ class RepairService:
                                 use_gfpgan=options.ai_use_gfpgan,
                                 use_inpaint=options.ai_use_inpaint,
                             )
+                            duration_ms = int((time.perf_counter() - ai_start) * 1000)
+                            options.log(
+                                "AI JPEG Patch Reconstruction tamamlandı.",
+                                color="blue",
+                                extra={
+                                    "step": "ai-patch",
+                                    "file": str(f),
+                                    "method": "ai_patch",
+                                    "result": "success",
+                                    "duration_ms": duration_ms,
+                                },
+                            )
                             # AI ile üretilen ek çıktıları da listeye ekle
                             outputs.extend(ai_outputs)
+                        elif options.use_ai_patch and f.suffix.lower() not in (".jpg", ".jpeg"):
+                            options.log(
+                                "AI patch JPEG olmadığı için atlandı.",
+                                color="orange",
+                                extra={"step": "ai-patch", "file": str(f), "result": "skipped"},
+                            )
+                        elif options.use_ai_patch and not outputs:
+                            options.log(
+                                "AI patch atlandı çünkü klasik onarım çıktı üretmedi.",
+                                color="orange",
+                                extra={"step": "ai-patch", "file": str(f), "result": "skipped"},
+                            )
                     except Exception as exc:  # AI tarafı asla tüm işlemi çökertmesin
                         options.log(f"[AI-PATCH] Çalıştırma sırasında hata: {exc}", color="orange")
 
                     self.successful_outputs[f] = outputs
                     self.last_processed_file = f
                     self.on_file_processed(f, outputs)
+
+                    duration_ms = int((time.perf_counter() - started_at) * 1000)
+                    options.log(
+                        "Dosya işlemesi tamamlandı.",
+                        color="blue" if outputs else "red",
+                        extra={
+                            "step": "file-end",
+                            "file": str(f),
+                            "result": "success" if outputs else "failed",
+                            "duration_ms": duration_ms,
+                        },
+                    )
 
                 self.on_finished()
             except Exception as exc:  # pragma: no cover - defensive

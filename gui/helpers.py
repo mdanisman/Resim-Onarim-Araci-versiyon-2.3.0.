@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
+import logging
 
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, ttk
@@ -21,8 +22,9 @@ class LogEntry:
 class LogHelper:
     text_widget: scrolledtext.ScrolledText
     structured_logs: List[LogEntry] = field(default_factory=list)
+    logger: Optional[logging.LoggerAdapter] = None
 
-    def log(self, message: str, color: str = "black") -> None:
+    def log(self, message: str, color: str = "black", extra: Optional[dict] = None) -> None:
         timestamp = time.strftime("%H:%M:%S")
         line = f"[{timestamp}] {message}\n"
 
@@ -36,6 +38,18 @@ class LogHelper:
             self.text_widget.after(0, _append)
         except Exception:
             _append()
+
+        level = logging.INFO
+        if color == "red":
+            level = logging.ERROR
+        elif color == "orange":
+            level = logging.WARNING
+
+        if self.logger:
+            try:
+                self.logger.log(level, message, extra=extra or {})
+            except Exception:
+                pass
 
         self.structured_logs.append(LogEntry(time=timestamp, message=message, color=color))
 

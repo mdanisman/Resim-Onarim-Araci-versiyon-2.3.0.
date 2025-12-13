@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
+from uuid import uuid4
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -11,6 +13,7 @@ from tkinter import filedialog, messagebox
 from core.jpeg_repair import build_header_library_from_folder
 from core.repair_engine import pick_best_output
 from utils import DEST_SUBFOLDER_NAME, detect_ffmpeg, is_image_file
+from logging_utils import create_logger
 
 from .helpers import LogHelper, PreviewHelper
 from .services import ProcessingOptions, RepairService
@@ -86,6 +89,9 @@ class RepairController:
         self.ffmpeg_cmd: Optional[str] = detect_ffmpeg()
         self.ffmpeg_available: bool = self.ffmpeg_cmd is not None
 
+        self.operation_id = f"GUI-{uuid4()}"
+        self.logger = create_logger(operation_id=self.operation_id, step="gui")
+
         self.progress_var = tk.DoubleVar()
         self.stats_total = tk.IntVar(value=0)
         self.stats_fixed = tk.IntVar(value=0)
@@ -120,7 +126,7 @@ class RepairController:
             OUTPUT_MODE_SAME,
         )
 
-        self.log_helper = LogHelper(self.widgets.txt_log)
+        self.log_helper = LogHelper(self.widgets.txt_log, logger=self.logger)
         self.preview_helper = PreviewHelper(MAX_PREVIEW_SIZE)
         self.preview_helper.set_inline_targets(
             self.widgets.preview_original_label,
@@ -140,6 +146,7 @@ class RepairController:
         self.header_library_folder: Optional[Path] = None
         self.last_output_dir: Optional[Path] = None
         self.custom_output_dir: Optional[Path] = None
+        self.start_time: Optional[float] = None
 
         default_msg = (
             "Uygulama başlatıldı.\n"
@@ -147,14 +154,20 @@ class RepairController:
             "- Sağ panelden onarım yöntemlerini ve ayarları yapılandırabilirsiniz.\n"
             "- Alt bölümde ilerleme, istatistik ve ayrıntılı günlükleri takip edebilirsiniz."
         )
-        self.log(default_msg, color="blue")
+        self.log(default_msg, color="blue", extra={"step": "ui-init", "result": "ready"})
+        ffmpeg_status = "available" if self.ffmpeg_available else "missing"
+        self.log(
+            f"FFmpeg durumu: {ffmpeg_status} ({self.ffmpeg_cmd or 'komut bulunamadı'})",
+            color="orange" if not self.ffmpeg_available else "blue",
+            extra={"step": "ffmpeg-check", "method": "ffmpeg", "result": ffmpeg_status},
+        )
         self.on_use_header_toggle()
 
     # --------------------------------------
     # Logging helpers
     # --------------------------------------
-    def log(self, message: str, color: str = "black") -> None:
-        self.log_helper.log(message, color=color)
+    def log(self, message: str, color: str = "black", extra: Optional[dict] = None) -> None:
+        self.log_helper.log(message, color=color, extra=extra)
 
     # --------------------------------------
     # Settings
@@ -209,6 +222,11 @@ class RepairController:
         path = Path(file_path)
         if not is_image_file(path, check_content=True):
             messagebox.showerror("Hata", "Seçilen dosya geçerli bir resim dosyası değil.")
+            self.log(
+                f"Geçersiz resim dosyası nedeniyle atlandı: {path}",
+                color="orange",
+                extra={"step": "input-validate", "file": str(path), "result": "skipped"},
+            )
             return
 
         self._start_processing([path])
@@ -229,6 +247,11 @@ class RepairController:
         files = list(self._iter_images(root_path))
         if not files:
             messagebox.showinfo("Bilgi", "Seçilen klasörde onarılabilecek resim dosyası bulunamadı.")
+            self.log(
+                f"Klasörde uygun resim bulunamadı: {root_path}",
+                color="orange",
+                extra={"step": "input-scan", "file": str(root_path), "result": "skipped"},
+            )
             return
 
         self._start_processing(files)
@@ -239,6 +262,7 @@ class RepairController:
             self.log(
                 "İşlem iptal isteği gönderildi. Devam eden dosya tamamlanınca duracak.",
                 color="orange",
+                extra={"step": "cancel", "result": "requested"},
             )
 
     def select_output_dir(self) -> None:
@@ -351,12 +375,17 @@ class RepairController:
         self.stats_processed.set(0)
         self.progress_var.set(0.0)
         self.service.successful_outputs.clear()
+        self.start_time = time.perf_counter()
 
         self.widgets.btn_cancel.config(state="normal")
         self.widgets.btn_process_single.config(state="disabled")
         self.widgets.btn_process_folder.config(state="disabled")
 
-        self.log(f"Toplam {total_files} dosya için onarım işlemi başlatıldı.", color="blue")
+        self.log(
+            f"Toplam {total_files} dosya için onarım işlemi başlatıldı.",
+            color="blue",
+            extra={"step": "process-start", "result": "running"},
+        )
 
         options = self._build_processing_options()
         self.service.start(files, options)
@@ -369,6 +398,13 @@ class RepairController:
             "64 KB": 64 * 1024,
         }
         header_size = size_map.get(self.variables.header_size_choice.get(), 16 * 1024)
+
+        if self.variables.use_ffmpeg.get() and not self.ffmpeg_available:
+            self.log(
+                "FFmpeg seçili ancak sistemde bulunamadı, devre dışı bırakılıyor.",
+                color="orange",
+                extra={"step": "ffmpeg-check", "method": "ffmpeg", "result": "skipped"},
+            )
 
         return ProcessingOptions(
             use_pillow=self.variables.use_pillow.get(),
@@ -434,9 +470,18 @@ class RepairController:
         total = self.stats_total.get()
         fixed = self.stats_fixed.get()
         failed = self.stats_failed.get()
+        duration_ms = None
+        if self.start_time is not None:
+            duration_ms = int((time.perf_counter() - self.start_time) * 1000)
+            self.start_time = None
         self.log(
             f"İşlem tamamlandı. Toplam: {total}, Onarılan: {fixed}, Başarısız: {failed}",
             color="blue",
+            extra={
+                "step": "process-end",
+                "result": "finished",
+                "duration_ms": duration_ms if duration_ms is not None else "-",
+            },
         )
 
         messagebox.showinfo(
@@ -444,11 +489,16 @@ class RepairController:
             f"Onarım işlemi tamamlandı.\nToplam: {total}\nOnarılan: {fixed}\nBaşarısız: {failed}",
         )
 
-    def _on_processing_error(self, exc: Exception) -> None:
+   def _on_processing_error(self, exc: Exception) -> None:
         messagebox.showerror(
             "Hata",
             f"İşleme sırasında beklenmeyen hata oluştu:\n{exc}",
         )
+        self.log(
+            f"Beklenmeyen hata: {exc}",
+            color="red",
+            extra={"step": "process-error", "result": "failed"},
+        )␊
         self._on_processing_finished()
 
     # --------------------------------------
@@ -462,6 +512,12 @@ class RepairController:
                 p = dpath / name
                 if is_image_file(p, check_content=use_content_check):
                     yield p
+                else:
+                    self.log(
+                        f"Girdi taramasında atlandı (resim değil veya bozuk): {p}",
+                        color="orange",
+                        extra={"step": "input-scan", "file": str(p), "result": "skipped"},
+                    )
 
     def _resolve_output_dir(self, input_path: Path) -> Optional[Path]:
         try:
